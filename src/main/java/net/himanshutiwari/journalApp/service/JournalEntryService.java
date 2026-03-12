@@ -1,0 +1,74 @@
+package net.himanshutiwari.journalApp.service;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import net.himanshutiwari.journalApp.entity.JournalEntry;
+import net.himanshutiwari.journalApp.entity.User;
+import net.himanshutiwari.journalApp.repository.JournalEntryRepository;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+@Component
+public class JournalEntryService  {
+    @Autowired
+    private JournalEntryRepository journalEntryRepository;
+
+    @Autowired
+    private UserService userService;
+
+    //creating the entry id name title .....
+    @Transactional
+    public void saveEntry(JournalEntry journalEntry, String userName){
+        try {
+            User user=userService.findByUserName(userName);
+            journalEntry.setDate(LocalDateTime.now());
+            JournalEntry saved = journalEntryRepository.save(journalEntry);
+            user.getJournalEntries().add(saved);
+            userService.saveUser(user);
+        }catch (Exception e){
+            throw new RuntimeException("An Error Occured while saving the entry : ",e);
+        }
+
+    }
+
+
+    public void saveEntry(JournalEntry journalEntry){
+        journalEntryRepository.save(journalEntry);
+    }
+
+
+    //getting the details
+    public List<JournalEntry> getAll(){
+        return journalEntryRepository.findAll();
+    }
+
+    //find by id
+    public Optional<JournalEntry> findById(ObjectId id){
+       return journalEntryRepository.findById(id);
+    }
+
+    //delete by id
+    @Transactional
+    public boolean deleteById(ObjectId id, String userName){
+        boolean removed=false;
+        try {
+            User user=userService.findByUserName(userName);
+            removed=user.getJournalEntries().removeIf(x ->x.getId().equals(id));
+            if(removed){
+                userService.saveUser(user);
+                journalEntryRepository.deleteById(id);
+            }
+        }catch (Exception e){
+            System.out.println(e);
+            throw new RuntimeException("An error occur while deleting the enrty");
+        }
+        return removed;
+
+
+    }
+
+
+}
