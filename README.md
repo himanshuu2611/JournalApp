@@ -117,7 +117,7 @@ JournalEntry
  └── user
 ▶️ Running the Application
 1️⃣ Clone Repository
-git clone https://github.com/himanshu2611/JournalApp.git
+git clone https://github.com/himanshu2611/JournalApp
 2️⃣ Go to project
 cd JournalApp
 3️⃣ Run project
